@@ -1,12 +1,12 @@
 from flask import Flask, render_template, redirect
 from flask_restful import Api
 from data import db_session
-from data.jobs import Jobs
 from data.users import User
-from flask_login import LoginManager, login_user, login_required, logout_user
+from data.notes import Note
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
-from my_api import user_resources, jobs_resource
+from my_api import user_resources
 
 app = Flask(__name__)
 api = Api(app)
@@ -19,8 +19,6 @@ def main():
     db_session.global_init("db/notes_database.db")
     api.add_resource(user_resources.UsersListResource, '/api/v2/users')
     api.add_resource(user_resources.UsersResource, '/api/v2/users/<int:user_id>')
-    api.add_resource(jobs_resource.JobsListResource, '/api/v2/jobs')
-    api.add_resource(jobs_resource.JobsResource, '/api/v2/jobs/<int:job_id>')
     app.run("localhost", "5050")
 
 
@@ -32,10 +30,10 @@ def load_user(user_id):
 @app.route("/")
 def index():
     session = db_session.create_session()
-    jobs = session.query(Jobs).all()
-    users = session.query(User).all()
-    names = {name.id: name.name for name in users}
-    return render_template("index.html", jobs=jobs, names=names)
+    print(current_user)
+    notes_list = session.query(Note).filter(Note.user_id == current_user.id)
+
+    return render_template("index.html", notes=notes)
 
 
 
@@ -67,7 +65,7 @@ def login():
     form = LoginForm()
     if form.validate_on_submit():
         db_sess = db_session.create_session()
-        user = db_sess.query(User).filter(User.email == form.email.data).first()
+        user = db_sess.query(User).filter(User.login == form.login.data).first()
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect("/")
