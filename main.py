@@ -3,7 +3,7 @@ from flask_restful import Api
 from data import db_session
 from data.users import User
 from data.notes import Note
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
 from my_api import user_resources
@@ -30,9 +30,9 @@ def load_user(user_id):
 @app.route("/")
 def index():
     session = db_session.create_session()
-    print(current_user)
-    notes_list = session.query(Note).filter(Note.user_id == current_user.id)
-
+    notes = []
+    if not user_unauthorized:
+        notes = list(session.query(Note).filter(Note.user_id == current_user.id))
     return render_template("index.html", notes=notes)
 
 
