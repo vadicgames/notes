@@ -17,3 +17,7 @@ h4 {
 p {
     font-size: 14pt;
 }
+.btn-delete {
+    color: #ff0000;
+    background-color: "#aaaaaa";
+}

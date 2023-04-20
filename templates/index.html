@@ -3,28 +3,20 @@
 {% block content %}
 <meta charset="UTF-8">
 <!--<link rel="stylesheet" type="text/css" href="/static/css/styles.css">-->
-<h2 align="center"><a class="btn btn-primary">Добавить заметку</a></h2>
+<h2 align="center"><a class="btn btn-primary" href="/add">Добавить заметку</a></h2>
 {% for note in notes %}
-<h3>Action #{{ job.id }}</h3>
+<h3>Note "{{ note.title.capitalize() }}"</h3>
 <div class="table_container">
     <table class="my_table">
         <tr class="my_row">
-            <td class="title" width="400px" Title of activity></td>
-            <td class="title" width="150px" Team leader></td>
-            <td class="title" width="100px" align="center">Duration</td>
-            <td class="title" width="200px" align="center">List of collaborators</td>
-            <td class="title" width="100px" align="center">Is finished</td>
+            <td class="title" width="400px"> Content</td>
+            <td class="title" width="150px" align="center">Created date</td>
+            <td width="50"></td>
         </tr>
         <tr class="my_row">
-            <td class="ordinary">{{ job.job.capitalize() }}</td>
-            <td class="ordinary">{{ names[job.team_leader][0] }} </td>
-            <td class="ordinary" align="center">{{ job.work_size }} hours</td>
-            <td class="ordinary" align="center">{{ job.collaborators }}</td>
-            {% if job.is_finished %}
-            <td class="ordinary" bgcolor="#eeffee" align="center">Finished</td>
-            {% else %}
-            <td class="ordinary" bgcolor="#ffeeff" align="center">Is not finished</td>
-            {% endif %}
+            <td class="ordinary">{{ note.content }} </td>
+            <td class="ordinary" align="center">{{ note.created_date }} </td>
+            <td width="50"><a class="btn btn-delete" href="/del/{{note.id}}">Удалить</a></td>
         </tr>
 
     </table>

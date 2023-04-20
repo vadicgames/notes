@@ -3,9 +3,10 @@ from flask_restful import Api
 from data import db_session
 from data.users import User
 from data.notes import Note
-from flask_login import LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized
+from flask_login import user_login_confirmed, LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
+from forms.note_form import Note_form
 from my_api import user_resources
 
 app = Flask(__name__)
@@ -31,8 +32,17 @@ def load_user(user_id):
 def index():
     session = db_session.create_session()
     notes = []
-    if not user_unauthorized:
-        notes = list(session.query(Note).filter(Note.user_id == current_user.id))
+    auth = False
+    try:
+        a = current_user.id
+        auth = True
+    except Exception:
+        auth = False
+    if auth:
+        if current_user.login == "admin":
+            notes = list(session.query(Note))
+        else:
+            notes = list(session.query(Note).filter(current_user.id == Note.user_id))
     return render_template("index.html", notes=notes)
 
 
@@ -50,6 +60,10 @@ def reqister():
             return render_template('register.html', title='Регистрация',
                                    form=form,
                                    message="Такой пользователь уже есть")
+        if form.login.data == "admin":
+            return render_template('register.html', title='Регистрация',
+                                   form=form,
+                                   message="Данный логин запрещён")
         user = User(
             name=form.name.data,
             login=form.login.data
@@ -80,6 +94,43 @@ def login():
 def logout():
     logout_user()
     return redirect("/")
+
+
+@app.route('/add', methods=['POST', "GET"])
+@login_required
+def add_note():
+    form = Note_form()
+    if form.validate_on_submit():
+        ds = db_session.create_session()
+        note = Note(
+            title=form.title.data,
+            content=form.content.data,
+            user_id=current_user.id
+        )
+        ds.add(note)
+        ds.commit()
+        return redirect("/")
+    return render_template("note_add.html", title='Создание новости', form=form)
+
+
+@app.route("/del/<note_id>", methods=["GET"])
+@login_required
+def confirm_delete(note_id):
+    session = db_session.create_session()
+    note = list(session.query(Note).filter(Note.id == note_id))[0]
+    return render_template("delete.html", note=note)
+
+
+@app.route("/delete/<note_id>", methods=["POST", "GET"])
+@login_required
+def delete_note(note_id):
+    session = db_session.create_session()
+    note = list(session.query(Note).filter(Note.id == note_id))[0]
+    if current_user.id == note.user_id or current_user.login == "admin":
+        session.delete(note)
+        session.commit()
+    return redirect('/')
+
 
 if __name__ == '__main__':
     main()
