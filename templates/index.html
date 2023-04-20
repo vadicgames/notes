@@ -3,7 +3,10 @@
 {% block content %}
 <meta charset="UTF-8">
 <!--<link rel="stylesheet" type="text/css" href="/static/css/styles.css">-->
-<h2 align="center"><a class="btn btn-primary" href="/add">Добавить заметку</a></h2>
+{% if current_user.is_authenticated %}
+    <h2 align="center"><a class="btn btn-primary" href="/add">Добавить заметку</a></h2>
+{% endif %}
+
 {% for note in notes %}
 <h3>Note "{{ note.title.capitalize() }}"</h3>
 <div class="table_container">
