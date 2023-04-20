@@ -1,16 +1,13 @@
 from flask import Flask, render_template, redirect
-from flask_restful import Api
 from data import db_session
 from data.users import User
 from data.notes import Note
-from flask_login import user_login_confirmed, LoginManager, login_user, login_required, logout_user, current_user, user_unauthorized
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from forms.login_form import LoginForm
 from forms.register_form import RegisterForm
 from forms.note_form import Note_form
-from my_api import user_resources
 
 app = Flask(__name__)
-api = Api(app)
 app.config['SECRET_KEY'] = 'yandexlyceum_secret_key'
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -18,8 +15,6 @@ login_manager.init_app(app)
 
 def main():
     db_session.global_init("db/notes_database.db")
-    api.add_resource(user_resources.UsersListResource, '/api/v2/users')
-    api.add_resource(user_resources.UsersResource, '/api/v2/users/<int:user_id>')
     app.run("localhost", "5050")
 
 
